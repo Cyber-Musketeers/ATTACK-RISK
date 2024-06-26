@@ -13,6 +13,14 @@ polars = "^0.20.31"
 mitreattack-python = "^3.0.6"
 stix = "^1.2.0.11"
 
+[tool.mypy]
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+
 
 [build-system]
 requires = ["poetry-core"]
