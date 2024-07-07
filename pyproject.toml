@@ -7,7 +7,7 @@ readme = "README.md"
 package-mode = false
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.11"
 pgmpy = "^0.1.25"
 polars = "^0.20.31"
 mitreattack-python = "^3.0.6"
