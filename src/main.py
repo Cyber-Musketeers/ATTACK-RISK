@@ -43,8 +43,8 @@ def read_flow_file(name: str) -> Any:
 
 
 def get_weight(obj: flow.AttackAction) -> int:
-
-    return 0
+    """returns the likelihood the flow action occurs"""
+    return 0.5
 
 
 def create_bayesian_network(attack_flow: Any) -> pgmpy.models.BayesianModel:
