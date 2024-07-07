@@ -42,15 +42,38 @@ def read_flow_file(name: str) -> Any:
         return bundle
 
 
+def get_weight(obj: flow.AttackAction) -> int:
+
+    return 0
+
+
+def create_bayesian_network(attack_flow: Any) -> pgmpy.models.BayesianModel:
+    starting_points = attack_flow.start_refs
+    starting_objects = []
+
+    # Function to get object by ID
+    def get_object_by_id(obj_id):
+        return next((obj for obj in attack_flow.objects if obj.id == obj_id), None)
+
+    for starting_point in starting_points:
+        starting_objects.append(get_object_by_id(starting_point))
+
+    for starting_object in starting_objects:
+        get_weight(starting_object)
+
+
 def main() -> None:
     """
     Main function of the program.
     """
     args = parse_args()
-    print_flow(args.flow_file)
+    # print_flow(args.flow_file)
+    flow_stix = read_flow_file(args.flow_file)
+
+    bayesian_network = create_bayesian_network(flow_stix)
 
 
-def print_flow(file):
+def print_flow(file: str) -> None:
     # Parse the STIX 2.1 bundle
     with open(file, "r", encoding="utf8") as file:
         bundle = stix2.parse(file.read(), allow_custom=True)
