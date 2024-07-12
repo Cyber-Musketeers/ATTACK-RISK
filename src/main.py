@@ -5,10 +5,12 @@ sys.path.append("./")
 from attack_flow_extension import flow
 import argparse
 from typing import Any
-import pgmpy
 from collections import defaultdict
 import stix2
 import json
+from pgmpy.models import BayesianNetwork
+from pgmpy.factors.discrete import TabularCPD
+from pgmpy.inference import VariableElimination
 
 
 def parse_args() -> argparse.Namespace:
@@ -47,9 +49,14 @@ def get_weight(obj: flow.AttackAction) -> int:
     return 0.5
 
 
-def create_bayesian_network(attack_flow: Any) -> pgmpy.models.BayesianModel:
+def create_bayesian_network(attack_flow: Any):
     starting_points = attack_flow.start_refs
     starting_objects = []
+
+    # Initialize the Bayesian Model
+    model = BayesianNetwork()
+    # passed in weights
+    node_weights = {}
 
     # Function to get object by ID
     def get_object_by_id(obj_id):
@@ -61,6 +68,38 @@ def create_bayesian_network(attack_flow: Any) -> pgmpy.models.BayesianModel:
     for starting_object in starting_objects:
         get_weight(starting_object)
 
+    for obj in attack_flow.objects:
+
+        #add object by object to BN
+        model.add_node(obj.id)
+
+        # check edges for same attack ref, if same then on same level and
+        # if not then just move on and connect to next node
+        # probably another for loop to look at remaining objects?
+        if same attack ref...
+            look at previous nodes and connect to right parent
+        if not then just connect to parent
+
+
+        model.add_edge(obj.id, related_obj_id)
+
+        #need logic to check for OR and AND and to just make a node following
+        #the creation of the CPD below as a trigger
+
+        # Add weights to nodes - need inputted weights
+        cpds = []
+        for node, weight in node_weights.items():
+            if weight is not None:
+                # Assuming binary states for simplicity (0, 1) and the provided weight is the probability of state 1
+                cpd = TabularCPD(variable=node, variable_card=2, values=[[1 - weight], [weight]])
+                cpds.append(cpd)
+
+        model.add_cpds(*cpds)
+
+        return model
+
+    # Return the Bayesian model and the initialized node weights dictionary
+    return model
 
 def main() -> None:
     """
