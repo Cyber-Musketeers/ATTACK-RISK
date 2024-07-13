@@ -1,84 +1,72 @@
+from dataclasses import dataclass
+from typing import NewType, List
 from mitreattack.stix20 import MitreAttackData
+from stix2 import AttackPattern, ExternalReference, Campaign
+
+StixId = NewType("StixId", str)
 
 
-class BayesianWeights:
-    def __init__(self, mitre_data: MitreAttackData):
-        self.techniques = []
-        self.mitre_data = mitre_data
-        campaigns = mitre_data.get_all_techniques_used_by_all_campaigns()
-        self.number_of_campaigns = len(campaigns)
+@dataclass
+class TechniqueProbability:
+    """
+    Represents the probability of a technique being used in an attack.
 
-        for campaign in campaigns:
-            attack_patterns = mitre_data.get_techniques_used_by_campaign(campaign)
-            for pattern in attack_patterns:
-                name = pattern.get("object").get("name")
-                stix_identifier = (
-                    pattern.get("object")
-                    .get("external_references")[0]
-                    .get("external_id")
+    Attributes:
+        name (str): The name of the technique.
+        ttp (str): The tactic, technique, and procedure (TTP) associated with the technique.
+        count (int): The number of times the technique has been observed.
+        probability (float): The probability of the technique being used.
+        stix_id (StixId): The STIX identifier for the technique.
+    """
+
+    name: str
+    ttp: str
+    count: int
+    probability: float
+    stix_id: StixId
+
+
+def probabilities_from_stix_data(
+    mitre_data: MitreAttackData,
+) -> dict[StixId, TechniqueProbability]:
+    """
+    Calculate the probabilities of each technique based on the provided STIX data.
+
+    Args:
+        mitre_data (MitreAttackData): The STIX data containing information about MITRE ATT&CK techniques and campaigns.
+
+    Returns:
+        dict[StixId, TechniqueProbability]: A dictionary mapping each technique's STIX ID to its corresponding TechniqueProbability object.
+
+    """
+    techniques: dict[StixId, TechniqueProbability] = {}
+    # Using the following method, we can go through each attack pattern and find campaigns where it is referenced
+    campaign_by_pattern: dict[StixId, List[Campaign]] = (
+        mitre_data.get_all_campaigns_using_all_techniques()
+    )
+    total_campaigns = len(mitre_data.get_campaigns())
+    attack_pattern: StixId
+    for attack_pattern in campaign_by_pattern:
+        campaign_list: List[Campaign] = campaign_by_pattern[attack_pattern]
+        pattern: AttackPattern = mitre_data.get_object_by_stix_id(attack_pattern)
+        external_references: List[ExternalReference] = pattern["external_references"]
+        # external references map this stix object to various databases such as ATT&CK and CAPEC. We only care about ATT&CK for now
+        for reference in external_references:
+            if reference["source_name"] == "mitre-attack":
+                probability = len(campaign_list) / total_campaigns
+                technique_with_prob = TechniqueProbability(
+                    pattern["name"],
+                    reference["external_id"],
+                    len(campaign_list),
+                    probability,
+                    attack_pattern,
                 )
-                self.add_or_increment_technique(stix_identifier)
-        self.techniques_with_probability = {}
-        techCounter = 0
-        for i in all_techniques:
-            name = i.get("name")
-            for ref in i["external_references"]:
-                if "external_id" in ref:
-                    external_id = ref["external_id"]
-                    count = self.get_technique_count(id)
-                    prob = count / self.number_of_campaigns
-                    attack_pattern = mitre_data.get_object_by_attack_id(
-                        external_id, "attack-pattern"
-                    )
-                    stixID = attack_pattern.get("id")
-                    self.techniques_with_probability[techCounter] = {
-                        "Name": name,
-                        "ID": external_id,
-                        "Count": count,
-                        "Probability": prob,
-                        "STIX ID": stixID,
-                    }
-            techCounter += 1
-
-    def add_or_increment_technique(self, technique):
-        # Check if the technique exists in the array
-        for item in self.techniques:
-            if item["name"] == technique:
-                # If it exists, increment its counter
-                item["counter"] += 1
-                # print(str(item))
-                return
-
-        # If the technique doesn't exist, add it with a counter of 1
-        self.techniques.append({"name": technique, "counter": 1})
-
-    def print_techniques(self):
-        for item in self.techniques:
-            print(f"Technique: {item['name']}, Counter: {item['counter']}")
-
-    def __str__(self):
-        return "\n".join(
-            [
-                f"Technique: {item['name']}, Counter: {item['counter']}"
-                for item in self.techniques
-            ]
-        )
-
-    def get_technique_count(self, technique: str) -> int | None:
-        for item in self.techniques:
-            if item["name"] == technique:
-                return item["counter"]
-        return None  # Technique not found
-
-    def get_technique(self, technique: str) -> dict | None:
-        for item in self.techniques:
-            if item["name"] == technique:
-                return item
-        return None  # Technique not found
+                techniques[attack_pattern] = technique_with_prob
+            else:
+                pass  # ignoring capec, etc.
+    return techniques
 
 
 # Example usage
-mitre_data = MitreAttackData("enterprise-attack.json")
-
-
-all_techniques = mitre_data.get_techniques()
+# mitre_data = MitreAttackData("enterprise-attack.json")
+# print(probabilities_from_stix_data(mitre_data))
