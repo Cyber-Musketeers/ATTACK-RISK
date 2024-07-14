@@ -14,6 +14,7 @@ from pgmpy.factors.discrete import TabularCPD
 from pgmpy.inference import VariableElimination
 from mitreattack.stix20 import MitreAttackData
 import networkx as nx
+import numpy as np
 
 
 def parse_args() -> argparse.Namespace:
@@ -47,54 +48,98 @@ def read_flow_file(name: str) -> stix2.Bundle:
         return bundle
 
 
-def create_bayesian_network(
-    attack_flow: flow.AttackFlow, probabilities: weights.ProbabilityDatabase
-) -> BayesianNetwork:
-    starting_points = attack_flow.get_statring_points()
-    starting_objects = []
+def flow_nx_to_pgmpy(
+    graph: nx.DiGraph, probabilities: weights.ProbabilityDatabase
+) -> BayesianNetwork | None:
+    model = BayesianNetwork(graph)
 
-    # Initialize the Bayesian Model
-    model = BayesianNetwork()
-    # passed in weights
-    node_weights = {}
-
-    for obj in attack_flow.objects:
-        # add object by object to BN
-        model.add_node(obj.id)
-
-        # check edges for same attack ref, if same then on same level and
-        # if not then just move on and connect to next node
-        # probably another for loop to look at remaining objects?
-        # if same attack ref...
-        #    look at previous nodes and connect to right parent
-        # if not then just connect to parent
-
-        # model.add_edge(obj.id, related_obj_id)
-
-        # need logic to check for OR and AND and to just make a node following
-        # the creation of the CPD below as a trigger
-
-        # Add weights to nodes - need inputted weights
-        cpds = []
-        for node, weight in node_weights.items():
-            if weight is not None:
-                # Assuming binary states for simplicity (0, 1) and the provided weight is the probability of state 1
-                cpd = TabularCPD(
-                    variable=node, variable_card=2, values=[[1 - weight], [weight]]
+    for node, node_data in model.nodes(data=True):
+        parents = list(model.predecessors(node))
+        flow_obj = node_data["object"]
+        if not parents:
+            # isolated node
+            if flow_obj.type == "attack-action":
+                # why do you just have the one node? this is a lot of work for just 1 node.
+                relevant_attack_pattern: str = flow_obj.get_attack_pattern_id()
+                probability = probabilities.get_probability_for_technique(
+                    weights.StixId(relevant_attack_pattern)
                 )
-                cpds.append(cpd)
-
-        model.add_cpds(*cpds)
+                cpd = TabularCPD(
+                    variable=node,
+                    variable_card=2,
+                    values=[[probability], [1 - probability]],
+                )
+                model.add_cpds(cpd)
+            elif flow_obj.type == "attack-operator":
+                # what is going on here? you have a lone attack operator not connected to anything. What does this mean? rethink your life
+                cpd = TabularCPD(variable=node, variable_card=2, values=[[0.5], [0.5]])
+            elif flow_obj.type == "attack-condition":
+                # what is going on here? you have a lone attack condition not connected to anything. What does this mean? rethink your life
+                cpd = TabularCPD(variable=node, variable_card=2, values=[[0.5], [0.5]])
+            else:
+                raise ValueError("Unknown node type")
+        elif parents:
+            if flow_obj.type == "attack-action":
+                evidence_card = []
+                relevant_attack_pattern: str = flow_obj.get_attack_pattern_id()
+                probability = probabilities.get_probability_for_technique(
+                    weights.StixId(relevant_attack_pattern)
+                )
+                vals = np.zeros((2, 2 ** len(parents)))
+                # top row is probability, bottom row is anti-probablity
+                vals[0, :] = probability
+                vals[1, :] = 1 - probability
+                evidence_card = [2] * len(parents)
+                cpd = TabularCPD(
+                    variable=node,
+                    variable_card=2,
+                    values=vals,
+                    evidence=parents,
+                    evidence_card=evidence_card,
+                )
+                model.add_cpds(cpd)
+            elif flow_obj.type == "attack-operator":
+                vals = np.zeros((2, 2 ** len(parents)))
+                # top row is probability, bottom row is anti-probablity
+                evidence_card = [2] * len(parents)
+                if flow_obj.is_and():
+                    # For AND, True only if all parents are True
+                    vals[0, :-1] = 1  # False for all combinations except last
+                    vals[0, -1] = 0  # False when all parents are True
+                    vals[1, :-1] = 0  # True only for last combination
+                    vals[1, -1] = 1  # True when all parents are True
+                elif flow_obj.is_or():
+                    # For OR, True if any parent is True
+                    vals[0, 0] = 1  # False only when all parents are False
+                    vals[0, 1:] = 0  # False for all other combinations
+                    vals[1, 0] = 0  # True for all combinations except first
+                    vals[1, 1:] = 1  # True if any parent is True
+                else:
+                    raise ValueError("Unknown operator type")
+                cpd = TabularCPD(
+                    variable=node,
+                    variable_card=2,
+                    values=vals,
+                    evidence=parents,
+                    evidence_card=evidence_card,
+                )
+                model.add_cpds(cpd)
+            elif flow_obj.type == "attack-condition":
+                # the way the model is setup, the attack condition stuff doesn't really make sense. Placeholder it as a uniform binary thing
+                cpd = TabularCPD(variable=node, variable_card=2, values=[[0.5], [0.5]])
+            else:
+                raise ValueError("Unknown node type")
+        model.check_model()
 
         return model
-
-    # Return the Bayesian model and the initialized node weights dictionary
-    return model
 
 
 def convert_attack_flow_to_nx(
     attack_flow: flow.AttackFlow, flow_bundle: stix2.Bundle
 ) -> nx.DiGraph:
+    """
+    performs a BFS to convert the attackflow to a networkx graph
+    """
     G = nx.DiGraph()
     queue = []
     for starting_node in attack_flow.get_starting_points():
