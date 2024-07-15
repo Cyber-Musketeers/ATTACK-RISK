@@ -197,7 +197,7 @@ def convert_attack_flow_to_nx(
     return G
 
 
-def pgmpy_to_hugin(model: BayesianNetwork) -> str:
+def pgmpy_to_unbbayes_hugin(model: BayesianNetwork) -> str:
     """
     Convert a pgmpy BayesianNetwork model to a Hugin format string.
 
@@ -209,11 +209,42 @@ def pgmpy_to_hugin(model: BayesianNetwork) -> str:
     """
     writer = NETWriter(model)
     raw_hugin_file = str(writer)
-    # cheap hack to get around a bug in either pgmpy or unbbayes.
+    # cheap hacks to get around a bug in either pgmpy or unbbayes.
+    for line in iter(raw_hugin_file.splitlines()):
+        # remove lines with "object" in them because unbbayes doesn't know what to do with that
+        if "object" in line:
+            raw_hugin_file = raw_hugin_file.replace(line, "")
+        # remove lines with "weight" in them because unbbayes doesn't know what to do with that
+        elif "weight" in line:
+            raw_hugin_file = raw_hugin_file.replace(line, "")
     # At the end of a node declaration, there is a open-squirly bracket. Unbbayes won't read the file unless thats on a new line
     # Also this makes the net file pretty ugly but if it works it works
+    # thanks r: https://www.bnlearn.com/bnrepository/discrete-small.html#asia
     raw_hugin_file = raw_hugin_file.replace("{", "\n{")
     return raw_hugin_file
+
+
+def make_nx_graph_more_readable(graph: nx.DiGraph) -> nx.DiGraph:
+    """
+    Make the graph more readable by adding labels to the nodes.
+
+    Args:
+        graph (nx.DiGraph): The graph to make more readable.
+
+    Returns:
+        nx.DiGraph: The more readable graph.
+    """
+    for node, node_data in graph.nodes(data=True):
+        obj = node_data["object"]
+        if obj.type == "attack-action":
+            graph.nodes[node]["label"] = f'"Action: {obj.name}"'
+        elif obj.type == "attack-operator":
+            graph.nodes[node]["label"] = f'"Operator: {obj.operator}"'
+        elif obj.type == "attack-condition":
+            graph.nodes[node]["label"] = f'"Condition: {obj.condition}"'
+        else:
+            raise ValueError("Unknown node type")
+    return graph
 
 
 def main() -> None:
@@ -230,9 +261,10 @@ def main() -> None:
     attack_data = MitreAttackData(args.attack_stix)
     probability_db = weights.ProbabilityDatabase(attack_data)
     flow_nx = convert_attack_flow_to_nx(flows[0], flow_bundle)
+    flow_nx = make_nx_graph_more_readable(flow_nx)
     bayesian_network = flow_nx_to_pgmpy(flow_nx, probability_db)
 
-    content = pgmpy_to_hugin(bayesian_network)
+    content = pgmpy_to_unbbayes_hugin(bayesian_network)
     with open(args.output_file, "w", encoding="utf-8") as file:
         file.write(content)
     print("New bayesian network written to", args.output_file)
