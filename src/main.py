@@ -132,8 +132,8 @@ def flow_nx_to_pgmpy(
                 cpd = TabularCPD(variable=node, variable_card=2, values=[[0.5], [0.5]])
             else:
                 raise ValueError("Unknown node type")
-        if not model.check_model():
-            raise ValueError("Model is invalid")
+    if not model.check_model():
+        raise ValueError("Model is invalid")
     return model
 
 
