@@ -244,6 +244,30 @@ def make_nx_graph_more_readable(graph: nx.DiGraph) -> nx.DiGraph:
             graph.nodes[node]["label"] = f'"Condition: {obj.condition}"'
         else:
             raise ValueError("Unknown node type")
+
+    # add positions to the nodes for better visualization, otherwise we will get a cthulhu monster in unbbayes
+    positions = nx.spring_layout(graph, k=0.5, iterations=50)
+    scale = 500  # 500 is probably fine
+    # Find the minimum values
+    min_x = min(coord[0] for coord in positions.values())
+    min_y = min(coord[1] for coord in positions.values())
+
+    # Shift all positions to be positive
+    positions = {
+        node: (coord[0] - min_x, coord[1] - min_y) for node, coord in positions.items()
+    }
+
+    # Scale up the positions
+    positions = {
+        node: (coord[0] * scale, coord[1] * scale) for node, coord in positions.items()
+    }
+
+    # Round to whole numbers
+    positions = {
+        node: (round(coord[0]), round(coord[1])) for node, coord in positions.items()
+    }
+    for node, pos in positions.items():
+        graph.nodes[node]["position"] = f"({pos[0]},{pos[1]})"
     return graph
 
 
