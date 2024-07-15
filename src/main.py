@@ -101,7 +101,7 @@ def flow_nx_to_pgmpy(
                 cpd = TabularCPD(
                     variable=node,
                     variable_card=2,
-                    values=[[probability], [1 - probability]],
+                    values=[[1 - probability], [probability]],
                 )
                 model.add_cpds(cpd)
             elif flow_obj.type == "attack-operator":
@@ -120,9 +120,9 @@ def flow_nx_to_pgmpy(
                     weights.StixId(relevant_attack_pattern)
                 )
                 vals = np.zeros((2, 2 ** len(parents)))
-                # top row is probability, bottom row is anti-probablity
-                vals[0, :] = probability
-                vals[1, :] = 1 - probability
+                # top row is false, bottom row is true
+                vals[0, :] = 1 - probability
+                vals[1, :] = probability
                 evidence_card = [2] * len(parents)
                 cpd = TabularCPD(
                     variable=node,
