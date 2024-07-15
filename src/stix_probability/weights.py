@@ -39,7 +39,7 @@ class ProbabilityDatabase:
         self.attack_stix_bundle = attack_stix_bundle
         self._probabilities_from_stix_data()
 
-    def _probabilities_from_stix_data(self):
+    def _probabilities_from_stix_data(self) -> None:
         """
         Calculate the probabilities of each technique based on the provided STIX data.
 

@@ -1,3 +1,22 @@
+"""
+This module provides a framework for analyzing cyber attack patterns and probabilities using Bayesian networks.
+It integrates various libraries such as NetworkX for graph operations, NumPy for numerical computations, and pgmpy for probabilistic graphical models. The module leverages the MITRE ATT&CK framework through the use of STIX 2.0 data format for expressing and exchanging cyber threat intelligence.
+
+The core functionality includes parsing command line arguments to specify input and output files, reading attack flow files in STIX format, and constructing Bayesian networks to model and infer attack probabilities. It utilizes custom extensions for attack flow and probability weighting to enhance the analysis.
+
+Features:
+- Command line interface for specifying input/output files.
+- Reading and parsing STIX 2.0 formatted attack flow files.
+- Construction and inference in Bayesian networks for attack analysis.
+
+Dependencies:
+- networkx
+- numpy
+- stix2
+- mitreattack.stix20
+- pgmpy
+"""
+
 import sys
 
 # add local directory to system path
@@ -54,8 +73,20 @@ def read_flow_file(name: str) -> stix2.Bundle:
 def flow_nx_to_pgmpy(
     graph: nx.DiGraph, probabilities: weights.ProbabilityDatabase
 ) -> BayesianNetwork:
-    model = BayesianNetwork(graph)
+    """
+    Converts a NetworkX directed graph representing a flow to a Bayesian network using pgmpy library.
 
+    Args:
+        graph (nx.DiGraph): The NetworkX directed graph representing the flow.
+        probabilities (weights.ProbabilityDatabase): The probability database containing the ATT&CK probabilities.
+
+    Returns:
+        BayesianNetwork: The converted Bayesian network.
+
+    Raises:
+        ValueError: If the model is invalid.
+    """
+    model = BayesianNetwork(graph)
     for node, node_data in model.nodes(data=True):
         parents = list(model.predecessors(node))
         flow_obj = node_data["object"]
