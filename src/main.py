@@ -2,19 +2,22 @@ import sys
 
 # add local directory to system path
 sys.path.append("./")
-from attack_flow_extension import flow
-from stix_probability import weights
 import argparse
-from typing import Any
-from collections import defaultdict
-import stix2
 import json
-from pgmpy.models import BayesianNetwork
-from pgmpy.factors.discrete import TabularCPD
-from pgmpy.inference import VariableElimination
-from mitreattack.stix20 import MitreAttackData
+from collections import defaultdict
+from typing import Any
+
 import networkx as nx
 import numpy as np
+import stix2
+from mitreattack.stix20 import MitreAttackData
+from pgmpy.factors.discrete import TabularCPD
+from pgmpy.inference import VariableElimination
+from pgmpy.models import BayesianNetwork
+
+from attack_flow_extension import flow
+from stix_probability import weights
+from pgmpy.readwrite import NETWriter
 
 
 def parse_args() -> argparse.Namespace:
@@ -27,7 +30,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--flow_file", type=str, required=True)
     parser.add_argument("--attack_stix", type=str, required=True)
-    # parser.add_argument("--output_file", type=str, required=True)
+    parser.add_argument("--output_file", type=str, required=True)
     return parser.parse_args()
 
 
@@ -50,7 +53,7 @@ def read_flow_file(name: str) -> stix2.Bundle:
 
 def flow_nx_to_pgmpy(
     graph: nx.DiGraph, probabilities: weights.ProbabilityDatabase
-) -> BayesianNetwork | None:
+) -> BayesianNetwork:
     model = BayesianNetwork(graph)
 
     for node, node_data in model.nodes(data=True):
@@ -131,7 +134,7 @@ def flow_nx_to_pgmpy(
                 raise ValueError("Unknown node type")
         if not model.check_model():
             raise ValueError("Model is invalid")
-        return model
+    return model
 
 
 def convert_attack_flow_to_nx(
@@ -163,6 +166,25 @@ def convert_attack_flow_to_nx(
     return G
 
 
+def pgmpy_to_hugin(model: BayesianNetwork) -> str:
+    """
+    Convert a pgmpy BayesianNetwork model to a Hugin format string.
+
+    Parameters:
+        model (BayesianNetwork): The pgmpy BayesianNetwork model to convert.
+
+    Returns:
+        str: The Hugin format string representation of the model.
+    """
+    writer = NETWriter(model)
+    raw_hugin_file = str(writer)
+    # cheap hack to get around a bug in either pgmpy or unbbayes.
+    # At the end of a node declaration, there is a open-squirly bracket. Unbbayes won't read the file unless thats on a new line
+    # Also this makes the net file pretty ugly but if it works it works
+    raw_hugin_file = raw_hugin_file.replace("{", "\n{")
+    return raw_hugin_file
+
+
 def main() -> None:
     """
     Main function of the program.
@@ -177,8 +199,14 @@ def main() -> None:
     attack_data = MitreAttackData(args.attack_stix)
     probability_db = weights.ProbabilityDatabase(attack_data)
     flow_nx = convert_attack_flow_to_nx(flows[0], flow_bundle)
-
     bayesian_network = flow_nx_to_pgmpy(flow_nx, probability_db)
+
+    content = pgmpy_to_hugin(bayesian_network)
+    with open(args.output_file, "w", encoding="utf-8") as file:
+        file.write(content)
+    print("New bayesian network written to", args.output_file)
+    print("The network can be loaded into Hugin or Unbbayes")
+    print("Thanks for using the program!")
 
 
 if __name__ == "__main__":
