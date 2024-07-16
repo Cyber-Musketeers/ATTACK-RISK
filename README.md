@@ -1,5 +1,5 @@
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/ossf/scorecard/badge)](https://scorecard.dev/viewer/?uri=github.com/Cyber-Musketeers/ATTACK-RISK)
 # ATTACK-RISK
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/Cyber-Musketeers/ATTACK-RISK/badge)](https://scorecard.dev/viewer/?uri=github.com/Cyber-Musketeers/ATTACK-RISK)
 ## What is this?
 
 This project is a preliminary attempt at converting the graphs created in [MITRE's ATT&CK Flow](https://mitre-engenuity.org/cybersecurity/center-for-threat-informed-defense/our-work/attack-flow/) into a Bayesian network that can be used by [UnBBayes](https://unbbayes.sourceforge.net/). Under the hood it uses STIX2, MITRE ATT&CK, and pgmpy.
