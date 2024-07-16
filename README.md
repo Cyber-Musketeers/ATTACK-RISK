@@ -1,3 +1,4 @@
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/ossf/scorecard/badge)](https://scorecard.dev/viewer/?uri=github.com/Cyber-Musketeers/ATTACK-RISK)
 # ATTACK-RISK
 ## What is this?
 
