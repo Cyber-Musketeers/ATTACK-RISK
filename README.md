@@ -40,6 +40,7 @@ Mac: You're on your own
 ### Step 6: Run main.py (ATTACK-RISK/src/main.py) with the following arguments:
 
 `cd src`
+
 `python3 .\main.py --flow_file flow_export.json --attack_stix enterprise-attack-15.1.json --output_file test.net`
 
 ![TOOL_RUN](https://github.com/user-attachments/assets/3bdcbff7-6a56-41e7-89e8-21224d6f9840)
