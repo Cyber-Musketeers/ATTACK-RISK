@@ -50,3 +50,13 @@ Mac: You're on your own
 
 ![unbbayes_load](https://github.com/user-attachments/assets/50263070-c4c7-4984-848a-f68321222b7c)
 
+## Developing
+
+This repository contains a devcontainer configuration that can be used to develop the application on various platforms. TODO unit tests
+
+## Future Work
+
+This implementation has a shaky ground on how the probabilities are calculated, they currently follow the methodology laid out by TODO ENTER PAPER HERE, but this means that over half of the ATT&CK TTPs have "minimal" probability
+
+## Citations
+
