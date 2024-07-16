@@ -16,7 +16,9 @@ This project is a preliminary attempt at converting the graphs created in [MITRE
 
 
 ### Step 2: Install dependencies with Poetry
+
 `poetry install`
+
 ![poetry_install](https://github.com/user-attachments/assets/b9fffefd-1ba7-4509-8d87-cc0ae9a8daf6)
 
 ### Step 3: Run main.py (ATTACK-RISK/src/main.py) with the following arguments:
