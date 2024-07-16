@@ -1,5 +1,17 @@
 # ATTACK-RISK
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/Cyber-Musketeers/ATTACK-RISK/badge)](https://scorecard.dev/viewer/?uri=github.com/Cyber-Musketeers/ATTACK-RISK)
+![License](https://img.shields.io/github/license/Cyber-Musketeers/ATTACK-RISK)
+![GitHub forks](https://img.shields.io/github/forks/Cyber-Musketeers/ATTACK-RISK)
+![GitHub stars](https://img.shields.io/github/stars/Cyber-Musketeers/ATTACK-RISK)
+![GitHub contributors](https://img.shields.io/github/contributors/Cyber-Musketeers/ATTACK-RISK)
+![GitHub last commit](https://img.shields.io/github/last-commit/Cyber-Musketeers/ATTACK-RISK)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/Cyber-Musketeers/ATTACK-RISK)
+![GitHub top language](https://img.shields.io/github/languages/top/Cyber-Musketeers/ATTACK-RISK)
+
+
+
+
+
 ## What is this?
 
 This project is a preliminary attempt at converting the graphs created in [MITRE's ATT&CK Flow](https://mitre-engenuity.org/cybersecurity/center-for-threat-informed-defense/our-work/attack-flow/) into a Bayesian network that can be used by [UnBBayes](https://unbbayes.sourceforge.net/). Under the hood it uses STIX2, MITRE ATT&CK, and pgmpy.
