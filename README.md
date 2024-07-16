@@ -60,3 +60,8 @@ This implementation has a shaky ground on how the probabilities are calculated, 
 
 ## Citations
 
+TODO
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Cyber-Musketeers/ATTACK-RISK&type=Date)](https://star-history.com/#Cyber-Musketeers/ATTACK-RISK&Date)
