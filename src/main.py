@@ -211,7 +211,7 @@ def convert_attack_flow_to_nx(
         node = queue.pop(0)
         list_of_objs = flow_bundle.get_obj(node)
         if len(list_of_objs) != 1:
-            raise ValueError("Expected to find exactly one object with id {node}")
+            raise ValueError(f"Expected to find exactly one object with id {node}")
         node_obj = list_of_objs[0]
         children = []
         if "effect_refs" in node_obj:
