@@ -28,6 +28,16 @@ from typing import List
     ],
 )
 class AttackFlow(_STIXBase21):
+    """
+    Represents an attack flow.
+
+    Attributes:
+        start_refs (list): A list of start references.
+
+    Methods:
+        get_starting_points: Returns the start references of the flow.
+    """
+
     def get_starting_points(self) -> List[str]:
         """
         Returns the start references of the flow.
@@ -64,7 +74,13 @@ class AttackFlow(_STIXBase21):
     ],
 )
 class AttackAction(_STIXBase21):
-    pass
+    """
+    Represents an attack action.
+
+    Attributes:
+        technique_ref (str): The technique reference of the action.
+        effect_refs (list): A list of effect references of the action.
+    """
 
     def get_technique_ref(self) -> str:
         """
@@ -104,7 +120,7 @@ class AttackAction(_STIXBase21):
             effect for effect in self.effect_refs if effect.type == "attack-operator"
         ]
 
-    def get_effect_condditions(self) -> List[str]:
+    def get_effect_conditions(self) -> List[str]:
         """
         Returns the effect conditions of the action.
 
@@ -139,6 +155,18 @@ class AttackAction(_STIXBase21):
     ],
 )
 class AttackAsset(_STIXBase21):
+    """
+    Represents an asset involved in an attack.
+
+    This class provides a base class for representing assets in the context of an attack.
+
+    Attributes:
+        None
+
+    Methods:
+        None
+    """
+
     pass
 
 
@@ -170,6 +198,18 @@ class AttackAsset(_STIXBase21):
     ],
 )
 class AttackCondition(_STIXBase21):
+    """
+    Represents an attack condition in the system.
+
+    This class provides a base class for defining attack conditions in the system.
+
+    Attributes:
+        None
+
+    Methods:
+        None
+    """
+
     pass
 
 
@@ -190,6 +230,19 @@ class AttackCondition(_STIXBase21):
     ],
 )
 class AttackOperator(_STIXBase21):
+    """
+    Represents an attack operator.
+
+    This class provides methods to check whether the operator is an AND or OR operator.
+
+    Attributes:
+        operator (str): The operator value.
+
+    Methods:
+        is_and(): Returns whether the operator is an AND operator.
+        is_or(): Returns whether the operator is an OR operator.
+    """
+
     def is_and(self) -> bool:
         """
         Returns whether the operator is an AND operator.
