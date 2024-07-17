@@ -75,6 +75,10 @@ This implementation has a shaky ground on how the probabilities are calculated, 
 
 TODO
 
+## Troubleshooting
+
+Sometimes pgmpy (and the transient scikit-learn dependencies) can get themselves into an unstable state. If you are running into issues on a old virtual environment, try deactivating the virtual environment, deleting the `.venv` folder, and reinstalling.
+
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=Cyber-Musketeers/ATTACK-RISK&type=Date)](https://star-history.com/#Cyber-Musketeers/ATTACK-RISK&Date)
