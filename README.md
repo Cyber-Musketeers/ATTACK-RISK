@@ -65,7 +65,8 @@ Mac: You're on your own
 
 ## Developing
 
-This repository contains a devcontainer configuration that can be used to develop the application on various platforms.
+This repository contains a devcontainer configuration that can be used to develop the application on various platforms. The unit tests are written in the pytest framework. The unit tests can be run with:
+`pytest` in the root of the repository
 
 ## Future Work
 
