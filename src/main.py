@@ -94,7 +94,7 @@ def flow_nx_to_pgmpy(
             # isolated node
             if flow_obj.type == "attack-action":
                 # why do you just have the one node? this is a lot of work for just 1 node.
-                relevant_attack_pattern: str = flow_obj.get_attack_pattern_id()
+                relevant_attack_pattern: str | None = flow_obj.get_attack_pattern_id()
                 probability = probabilities.get_probability_for_technique(
                     weights.StixId(relevant_attack_pattern)
                 )
