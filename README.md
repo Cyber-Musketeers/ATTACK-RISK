@@ -66,7 +66,15 @@ This repository contains a devcontainer configuration that can be used to develo
 
 ## Future Work
 
-This implementation has a shaky ground on how the probabilities are calculated, they currently follow the methodology laid out by [1], but this means that over half of the ATT&CK TTPs have "minimal" probability
+This implementation has a shaky ground on how the probabilities are calculated, they currently follow the methodology laid out by [1], but this means that over half of the ATT&CK TTPs have "minimal" probability.
+
+To consider mitigations and how they impact TTPs when making the bayesian network, MITRE ATT&CK mappings to the NIST controls an organization has implemented could be used, but that is currently blocked by [this issue](https://github.com/center-for-threat-informed-defense/mappings-explorer/issues/96). In theory, this could be introduced via a [Heimdall](https://github.com/mitre/heimdall2) export
+
+Currently, the program does not properly handle "Attack Condition" blocks. The algorithm only converts the "true" path into the bayesian network. Future works should also implement the "false" path.
+
+![image](https://github.com/user-attachments/assets/4f445535-eecc-4f08-90e5-814528312e8c)
+
+
 
 ## Citations
 
