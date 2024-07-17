@@ -95,9 +95,15 @@ def flow_nx_to_pgmpy(
             if flow_obj.type == "attack-action":
                 # why do you just have the one node? this is a lot of work for just 1 node.
                 relevant_attack_pattern: str | None = flow_obj.get_attack_pattern_id()
-                probability = probabilities.get_probability_for_technique(
-                    weights.StixId(relevant_attack_pattern)
-                )
+                probability: float
+                if relevant_attack_pattern is None:
+                    probability = probabilities.get_probability_for_technique(
+                        weights.StixId("")
+                    )
+                else:
+                    probability = probabilities.get_probability_for_technique(
+                        weights.StixId(relevant_attack_pattern)
+                    )
                 cpd = TabularCPD(
                     variable=node,
                     variable_card=2,
@@ -118,6 +124,7 @@ def flow_nx_to_pgmpy(
             if flow_obj.type == "attack-action":
                 evidence_card = []
                 relevant_attack_pattern: str | None = flow_obj.get_attack_pattern_id()
+                probability: float
                 if relevant_attack_pattern is None:
                     probability = probabilities.get_probability_for_technique(
                         weights.StixId("")
@@ -206,9 +213,14 @@ def convert_attack_flow_to_nx(
         if len(list_of_objs) != 1:
             raise ValueError("Expected to find exactly one object with id {node}")
         node_obj = list_of_objs[0]
-        if "effect_refs" not in node_obj:
+        children = []
+        if "effect_refs" in node_obj:
+            children = node_obj["effect_refs"]
+        elif "on_true_refs" in node_obj:
+            children = node_obj["on_true_refs"]
+        else:
             continue
-        for child in node_obj["effect_refs"]:
+        for child in children:
             if child not in queue:
                 backing_obj = flow.get_single_flow_object_by_id(child, flow_bundle)
                 G.add_node(child, object=backing_obj)

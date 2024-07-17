@@ -213,8 +213,6 @@ class AttackCondition(_STIXBase21):
         None
     """
 
-    pass
-
 
 @CustomObject(
     "attack-operator",
