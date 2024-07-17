@@ -216,10 +216,16 @@ def convert_attack_flow_to_nx(
         children = []
         if "effect_refs" in node_obj:
             children = node_obj["effect_refs"]
-        elif "on_true_refs" in node_obj:
-            children = node_obj["on_true_refs"]
         else:
-            continue
+            if "on_true_refs" in node_obj:
+                children += node_obj["on_true_refs"]
+            if "on_false_refs" in node_obj:
+                # TODO handle false_refs
+                # children += node_obj["on_false_refs"]
+                continue
+            if "on_true_refs" not in node_obj and "on_false_refs" not in node_obj:
+                # this is a terminal node
+                continue
         for child in children:
             if child not in queue:
                 backing_obj = flow.get_single_flow_object_by_id(child, flow_bundle)
