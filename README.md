@@ -74,7 +74,7 @@ Currently, the program does not properly handle "Attack Condition" blocks. The a
 
 ![image](https://github.com/user-attachments/assets/4f445535-eecc-4f08-90e5-814528312e8c)
 
-
+The current project doesn't provide a pyinstaller for the program, improving the build to produce an executable is a simple future improvement.
 
 ## Citations
 
