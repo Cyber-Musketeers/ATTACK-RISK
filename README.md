@@ -65,7 +65,7 @@ Mac: You're on your own
 
 ## Developing
 
-This repository contains a devcontainer configuration that can be used to develop the application on various platforms. TODO unit tests
+This repository contains a devcontainer configuration that can be used to develop the application on various platforms.
 
 ## Future Work
 
@@ -73,7 +73,8 @@ This implementation has a shaky ground on how the probabilities are calculated, 
 
 ## Citations
 
-TODO
+[1] B. Al-Sada, A. Sadighian, and G. Oligeri, “Analysis and Characterization of Cyber Threats Leveraging the MITRE ATT&CK Database,” IEEE Access, vol. 12, pp. 1217–1234, 2024, doi: 10.1109/ACCESS.2023.3344680.
+
 
 ## Troubleshooting
 
