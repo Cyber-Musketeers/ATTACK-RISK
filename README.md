@@ -69,7 +69,7 @@ This repository contains a devcontainer configuration that can be used to develo
 
 ## Future Work
 
-This implementation has a shaky ground on how the probabilities are calculated, they currently follow the methodology laid out by TODO ENTER PAPER HERE, but this means that over half of the ATT&CK TTPs have "minimal" probability
+This implementation has a shaky ground on how the probabilities are calculated, they currently follow the methodology laid out by [1], but this means that over half of the ATT&CK TTPs have "minimal" probability
 
 ## Citations
 
