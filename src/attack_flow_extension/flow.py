@@ -229,6 +229,19 @@ def get_flows_from_stix_bundle(bundle: Bundle) -> List[AttackFlow]:
 def get_single_flow_object_by_id(
     flow_id: str, flow_bundle: Bundle
 ) -> AttackAction | AttackOperator | AttackCondition:
+    """
+    Retrieves a single flow object by its ID from a given flow bundle.
+
+    Args:
+        flow_id (str): The ID of the flow object to retrieve.
+        flow_bundle (Bundle): The flow bundle containing the flow objects.
+
+    Returns:
+        AttackAction | AttackOperator | AttackCondition: The flow object with the specified ID.
+
+    Raises:
+        ValueError: If no object or more than one object with the specified ID is found.
+    """
     candidate_objects = flow_bundle.get_obj(flow_id)
     if len(candidate_objects) != 1:
         raise ValueError(
