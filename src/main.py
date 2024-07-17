@@ -107,18 +107,25 @@ def flow_nx_to_pgmpy(
             elif flow_obj.type == "attack-operator":
                 # what is going on here? you have a lone attack operator not connected to anything. What does this mean? rethink your life
                 cpd = TabularCPD(variable=node, variable_card=2, values=[[0.5], [0.5]])
+                model.add_cpds(cpd)
             elif flow_obj.type == "attack-condition":
                 # what is going on here? you have a lone attack condition not connected to anything. What does this mean? rethink your life
                 cpd = TabularCPD(variable=node, variable_card=2, values=[[0.5], [0.5]])
+                model.add_cpds(cpd)
             else:
                 raise ValueError("Unknown node type")
         elif parents:
             if flow_obj.type == "attack-action":
                 evidence_card = []
-                relevant_attack_pattern: str = flow_obj.get_attack_pattern_id()
-                probability = probabilities.get_probability_for_technique(
-                    weights.StixId(relevant_attack_pattern)
-                )
+                relevant_attack_pattern: str | None = flow_obj.get_attack_pattern_id()
+                if relevant_attack_pattern is None:
+                    probability = probabilities.get_probability_for_technique(
+                        weights.StixId("")
+                    )
+                else:
+                    probability = probabilities.get_probability_for_technique(
+                        weights.StixId(relevant_attack_pattern)
+                    )
                 vals = np.zeros((2, 2 ** len(parents)))
                 # top row is false, bottom row is true
                 vals[0, :] = 1 - probability
@@ -160,7 +167,20 @@ def flow_nx_to_pgmpy(
                 model.add_cpds(cpd)
             elif flow_obj.type == "attack-condition":
                 # the way the model is setup, the attack condition stuff doesn't really make sense. Placeholder it as a uniform binary thing
-                cpd = TabularCPD(variable=node, variable_card=2, values=[[0.5], [0.5]])
+                vals = np.zeros((2, 2 ** len(parents)))
+                probability = 0.5
+                # top row is false, bottom row is true
+                vals[0, :] = 1 - probability
+                vals[1, :] = probability
+                evidence_card = [2] * len(parents)
+                cpd = TabularCPD(
+                    variable=node,
+                    variable_card=2,
+                    values=vals,
+                    evidence=parents,
+                    evidence_card=evidence_card,
+                )
+                model.add_cpds(cpd)
             else:
                 raise ValueError("Unknown node type")
     if not model.check_model():
@@ -241,7 +261,7 @@ def make_nx_graph_more_readable(graph: nx.DiGraph) -> nx.DiGraph:
         elif obj.type == "attack-operator":
             graph.nodes[node]["label"] = f'"Operator: {obj.operator}"'
         elif obj.type == "attack-condition":
-            graph.nodes[node]["label"] = f'"Condition: {obj.condition}"'
+            graph.nodes[node]["label"] = f'"Condition: {obj.description}"'
         else:
             raise ValueError("Unknown node type")
 

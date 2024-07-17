@@ -82,13 +82,16 @@ class AttackAction(_STIXBase21):
         effect_refs (list): A list of effect references of the action.
     """
 
-    def get_technique_ref(self) -> str:
+    def get_technique_ref(self) -> str | None:
         """
         Returns the technique reference of the action.
 
         Returns:
             str: The technique reference.
         """
+        # test if the instance has a technique_ref attribute
+        if not hasattr(self, "technique_ref"):
+            return None
         return self.technique_ref
 
     def get_effect_refs(self) -> List[str]:
@@ -131,7 +134,7 @@ class AttackAction(_STIXBase21):
             effect for effect in self.effect_refs if effect.type == "attack-condition"
         ]
 
-    def get_attack_pattern_id(self) -> str:
+    def get_attack_pattern_id(self) -> str | None:
         """
         Returns the attack pattern of the action.
 
